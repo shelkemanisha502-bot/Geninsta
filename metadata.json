@@ -1,0 +1,8 @@
+{
+  "name": "Copy of InstaGen AI",
+  "description": "A smart social media feed clone powered by Gemini for content creation and caption generation.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
