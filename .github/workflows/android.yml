@@ -1,0 +1,47 @@
+name: name: Android CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    # STEP 1: Unzip your project files FIRST so GitHub can actually see the Gradle files
+    - name: Unzip Project Files
+      run: |
+        unzip -q "*.zip" -d ./extracted_project
+        if [ -f ./extracted_project/gradlew ]; then
+          mv ./extracted_project/* .
+        else
+          mv ./extracted_project/*/* . || true
+        fi
+
+    # STEP 2: Set up JDK 11 (Now it will find the files and cache correctly!)
+    - name: set up JDK 11
+      uses: actions/setup-java@v4
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+        cache: gradle
+
+    # STEP 3: Grant permission to the build runner
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+
+    # STEP 4: Build ONLY the APK (Much faster and avoids test errors)
+    - name: Build Debug APK
+      run: ./gradlew assembleDebug --no-daemon
+
+    # STEP 5: Make the finished APK downloadable on your phone
+    - name: Upload APK Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: my-android-app
+        path: "**/build/outputs/apk/debug/app-debug.apk"
